@@ -1,0 +1,16 @@
+{
+  "use_proxies": false,
+  "proxy_file": "proxies.txt",
+
+  "send_discord": false,
+  "discord_webhook": "",
+
+  "mongo_uri": "mongodb://localhost/frenzy_test",
+
+  "frenzy_endpoint": "https://frenzy.shopifyapps.com/api/flashsales/",
+
+  "poll_time": 10.0,
+
+  "warn_before_drop": false,
+  "minutes_before_warning": 5
+}
