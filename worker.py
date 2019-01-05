@@ -5,7 +5,10 @@ import requests
 import json
 from time import sleep
 from datetime import datetime, timedelta
+import urllib3
 from models import Sale
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class Worker(Thread):
@@ -14,9 +17,10 @@ class Worker(Thread):
         self.configuration = configuration
 
     def get_initial_scrape(self):
-        print('getting intial scrape')
+        print('getting initial scrape')
         r = requests.get(
-            url=self.configuration['frenzy_endpoint']
+            url=self.configuration['frenzy_endpoint'],
+            verify=False
         )
         try:
             r.raise_for_status()
@@ -54,7 +58,8 @@ class Worker(Thread):
     def scrape_for_new_sales(self):
         print('checking for new sales')
         r = requests.get(
-            url=self.configuration['frenzy_endpoint']
+            url=self.configuration['frenzy_endpoint'],
+            verify=False
         )
         try:
             r.raise_for_status()
@@ -101,11 +106,11 @@ class Worker(Thread):
         return True
 
     def fire_discord(self, sale, new=False):
-        if not self.configuration['fire_discord']:
+        if not self.configuration['send_discord']:
             return True
         embed = {
-            "title": "APP LINK: {}".format(sale.title),
-            "url": "https://discordapp.com/123",
+            "title": "LINK: {}".format(sale.title),
+            "url": "https://frenzy.sale/{}".format(sale.handle),
             "color": 8311585,
 
             "timestamp": datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
@@ -149,12 +154,14 @@ class Worker(Thread):
             json={
                 "content": content,
                 "embeds": [embed]
-            }
+            },
+            verify=False
         )
         try:
             r.raise_for_status()
         except requests.exceptions.HTTPError:
             print('[error firing discord] code {}'.format(r.status_code))
+            print(r.text)
             try:
                 j = r.json()
                 try:
