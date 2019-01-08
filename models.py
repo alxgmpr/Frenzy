@@ -12,3 +12,5 @@ class Sale(Document):
     is_sold_out = BooleanField(default=False)
     is_pickup = BooleanField(default=False)
     shipping_message = StringField()
+    has_sent_new_alert = BooleanField(default=False)
+    has_sent_time_alert = BooleanField(default=False)

@@ -103,6 +103,8 @@ class Worker(Thread):
                     print('[error] couldnt save new sale to database')
                     return False
                 self.fire_discord(new_sale, new=True)
+                new_sale.has_sent_new_alert = True
+                new_sale.save()
         return True
 
     def fire_discord(self, sale, new=False):
@@ -179,9 +181,14 @@ class Worker(Thread):
             return True
         print('checking for upcoming sales')
         for sale in Sale.objects:
-            if sale.start_time - timedelta(minutes=self.configuration['minutes_before_warning']) >= datetime.now():
-                print('{} is coming up in {} minutes'.format(sale.title, self.configuration['minutes_before_warning']))
+            if sale.has_sent_time_alert:
+                pass
+            diff_mins = ((sale.start_time - datetime.now()).total_seconds()-21600)/60
+            if 0 < diff_mins <= self.configuration['minutes_before_warning']:
+                print('{} is coming up in less than {} minutes'.format(sale.title, self.configuration['minutes_before_warning']))
                 self.fire_discord(sale)
+                sale.has_sent_time_alert = True
+                sale.save()
         return True
 
     def run(self):
