@@ -183,12 +183,13 @@ class Worker(Thread):
         for sale in Sale.objects:
             if sale.has_sent_time_alert:
                 pass
-            diff_mins = ((sale.start_time - datetime.now()).total_seconds()-21600)/60
-            if 0 < diff_mins <= self.configuration['minutes_before_warning']:
-                print('{} is coming up in less than {} minutes'.format(sale.title, self.configuration['minutes_before_warning']))
-                self.fire_discord(sale)
-                sale.has_sent_time_alert = True
-                sale.save()
+            else:
+                diff_mins = ((sale.start_time - datetime.now()).total_seconds()-21600)/60
+                if 0 < diff_mins <= self.configuration['minutes_before_warning']:
+                    print('{} is coming up in less than {} minutes'.format(sale.title, self.configuration['minutes_before_warning']))
+                    self.fire_discord(sale)
+                    sale.has_sent_time_alert = True
+                    sale.save()
         return True
 
     def run(self):
